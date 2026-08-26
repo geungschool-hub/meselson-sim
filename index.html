@@ -681,7 +681,7 @@ var MODELS = [
         { top:'HLLLLHLL', bot:'LLHLLLLH' }, { top:'LLHLLLHL', bot:'HLLLHLLL' }],
     actSep:'① 조각으로 잘린다', actSyn:'② 새 조각과 섞여 이어진다',
     actSep2:'① 조각이 다시 잘린다', actSyn2:'② 다시 섞여 이어진다',
-    capSep:'분자가 여덟 조각으로 잘린다.|어느 가닥도 온전히 남지 않는다.',
+    capSep:'어버이 분자가 조각조각 잘린다.|어느 가닥도 온전히 남지 않는다.',
     capSyn:'잘린 조각이 새 ¹⁴N 조각과|섞여 다시 이어진다.',
     capSep2:'조각이 다시 잘린다.',
     capSyn2:'다시 이어져 ¹⁵N 이|절반으로 줄어든다.',
@@ -1336,7 +1336,9 @@ function balRun(){
    ══════════════════════════════════════════════════════════════ */
 var REP_W = 680, REP_H = 344;
 var REP_ROW = { P:44, G1:126, G2:208 };
-var REP_X = { P:[272], G1:[192, 352], G2:[32, 192, 352, 512] };
+/* ★G1 두 자리의 간격을 좁히지 말 것 — 오른쪽 그룹의 「주형」 라벨(왼쪽 정렬 끝)이
+   왼쪽 그룹의 마지막 칸을 덮는다. 192/352(간격 24px)에서 172/372(간격 64px)로 벌렸다. */
+var REP_X = { P:[272], G1:[172, 372], G2:[32, 192, 352, 512] };
 var DUPLEX_H = 2 * CELL_H + STRAND_GAP;          /* 24 — 이중나선 한 개의 높이 */
 var REP_LAST = 7;                                /* 마지막 국면 번호 — ANI_STEPS.rep 와 맞춰야 한다 */
 
@@ -1424,12 +1426,21 @@ function repFrame(id, ph){
   var parentX   = first ? REP_X.P : REP_X.G1;
   var rowY      = first ? REP_ROW.P : REP_ROW.G1;
   var stage     = (ph === 2 || ph === 5) ? 'separate' : 'synth';
-  /* ★분리 국면에서 **열리지 않는 모델**(보존적·분산적)은 어버이 분자를 제자리에 그대로 둔다.
-     열리는 모델(반보존적)만 두 가닥이 갈라져 딸 자리로 벌어진다. */
-  if (stage === 'separate' && repCast(id).dup !== 'unzip'){
-    var ps = repSlots(id, parentGen);
-    for (i = 0; i < ps.length; i++) out.push({ slot:i, gen:parentGen, x:parentX[i], y:rowY, keys:ps[i] });
-    return { duplexes:out, mode:'forming', stage:'separate', gen:childGen, parentGen:parentGen };
+  /* ★분리 국면에 **무엇이 남는가**는 모델마다 다르다. 이것이 세 모델을 가르는 자리다.
+       · 반보존적(unzip)  — 어버이 가닥 둘이 **갈라져** 딸 자리로 벌어진다
+       · 보존적(copy)     — 어버이 분자가 **열리지 않고 제자리에** 그대로 있다
+       · 분산적(shatter)  — 어버이 분자가 **조각나 사라진다.** 남는 가닥이 하나도 없다
+     ⚠ 분산적에서 어버이 분자를 남겨 두면 온전한 분자 위에 조각 구름이 겹쳐 그려져
+       「이전 단계 그림이 남아 있는」 꼴이 된다(2026-08-26 교사 지적). 빈 목록을 돌려준다. */
+  if (stage === 'separate'){
+    if (c.dup === 'shatter'){
+      return { duplexes:[], mode:'forming', stage:'separate', gen:childGen, parentGen:parentGen };
+    }
+    if (c.dup === 'copy'){
+      var ps = repSlots(id, parentGen);
+      for (i = 0; i < ps.length; i++) out.push({ slot:i, gen:parentGen, x:parentX[i], y:rowY, keys:ps[i] });
+      return { duplexes:out, mode:'forming', stage:'separate', gen:childGen, parentGen:parentGen };
+    }
   }
   var kids = repSlots(id, childGen), dy = DUP_DY[c.dup];
   for (i = 0; i < kids.length; i++){
@@ -1634,15 +1645,28 @@ function repAnnoSvg(id, ph){
         s += '<path d="M' + (x - 19) + ',' + (rowY + dy[1] + 6) + ' L' + (x - 14) + ',' + (rowY + dy[1] + 14) + ' L' + (x - 9) + ',' + (rowY + dy[1] + 6) + ' Z" fill="' + C_GEARD + '"></path>';
       }
     } else {
-      /* 잘리고 섞인다 — 조각이 흩어진다 (고정 좌표. 난수를 쓰지 않는다) */
-      var SC = [[-58,-16],[-34,-3],[-12,-19],[10,-7],[32,-21],[54,-9],[-46,13],[-24,23],
-                [-2,11],[20,25],[42,13],[64,23],[-66,3],[-16,-31],[28,-33],[76,3]];
-      var cx = x + MOL_W / 2, cy = rowY + 12;
-      for (var q = 0; q < SC.length; q++){
-        var heavy = sep ? (q % 2 === 0) : (q % 4 === 0);   /* 합성 국면에는 ¹⁴N 조각이 섞여 들어와 있다 */
-        s += '<rect x="' + (cx + SC[q][0]) + '" y="' + (cy + SC[q][1]) + '" width="' + CELL_W + '" height="' + CELL_H + '" ' +
-             'fill="' + (heavy ? C_N15 : C_N14) + '" stroke="#fff" stroke-width=".8"></rect>';
-        if (heavy) s += '<circle cx="' + (cx + SC[q][0] + CELL_W / 2) + '" cy="' + (cy + SC[q][1] + CELL_H / 2) + '" r="1.7" fill="#fff" opacity=".9"></circle>';
+      /* ★조각 구름은 **분리 국면에만** 그린다.
+         합성 국면까지 남겨 두면 이어 붙은 분자 위에 조각이 겹쳐 「이전 그림이 남은」 꼴이 된다.
+         ★조각의 조성은 **어버이 분자에서 계산한다** — 어버이의 16칸이 그대로 흩어진 것이다.
+           그래서 P 를 자르면 16칸 모두 ¹⁵N, G1 을 자르면 8칸만 ¹⁵N 이다(칸 총합은 늘 16). */
+      if (sep){
+        var SC = [[-58,-16],[-34,-3],[-12,-19],[10,-7],[32,-21],[54,-9],[-46,13],[-24,23],
+                  [-2,11],[20,25],[42,13],[64,23],[-66,3],[-16,-31],[28,-33],[76,3]];
+        /* 무거운 조각을 구름에 고루 흩는다 (고정 차례. 난수를 쓰지 않는다) */
+        var HORD = [0,9,4,13,2,11,6,15,1,8,5,12,3,10,7,14];
+        var pMol = molsOf(id, (ph <= 3) ? 0 : 1)[k];
+        var nH = hOfMol(pMol);
+        var cx = x + MOL_W / 2, cy = rowY + 12;
+        for (var q = 0; q < SC.length; q++){
+          var heavy = (HORD.indexOf(q) < nH);
+          s += '<rect x="' + (cx + SC[q][0]) + '" y="' + (cy + SC[q][1]) + '" width="' + CELL_W + '" height="' + CELL_H + '" ' +
+               'fill="' + (heavy ? C_N15 : C_N14) + '" stroke="#fff" stroke-width=".8"></rect>';
+          if (heavy) s += '<circle cx="' + (cx + SC[q][0] + CELL_W / 2) + '" cy="' + (cy + SC[q][1] + CELL_H / 2) + '" r="1.7" fill="#fff" opacity=".9"></circle>';
+        }
+      } else {
+        /* 합성 국면 — 이어 붙는 자리를 짧은 막대로 짚기만 한다(조각은 이미 이어졌다) */
+        s += '<path d="M' + (x + MOL_W + 4) + ',' + (rowY + dy[0] + 12) + ' l9,0" stroke="' + C_N14 + '" stroke-width="2.4"></path>';
+        s += '<path d="M' + (x + MOL_W + 4) + ',' + (rowY + dy[1] + 12) + ' l9,0" stroke="' + C_N14 + '" stroke-width="2.4"></path>';
       }
     }
   }
@@ -1652,10 +1676,11 @@ function repAnnoSvg(id, ph){
   var fill = sep ? '#555' : C_N14;
   for (var t = 0; t < lines.length; t++){
     if (first){
-      s += '<text x="' + (xs[0] + MOL_W + 20) + '" y="' + (rowY + 14 + t * 15) + '" font-size="12" ' +
+      /* ★조각 구름은 분자보다 옆으로 넓다(±76). 그만큼 더 밀어야 글이 조각에 깔리지 않는다. */
+      s += '<text x="' + (xs[0] + MOL_W + (c.dup === 'shatter' ? 48 : 20)) + '" y="' + (rowY + 14 + t * 15) + '" font-size="12" ' +
            'font-weight="' + (sep ? '600' : 'bold') + '" fill="' + fill + '">' + lines[t] + '</text>';
     } else {
-      s += '<text x="340" y="' + (rowY - 34 + t * 15) + '" text-anchor="middle" font-size="12" ' +
+      s += '<text x="340" y="' + (rowY - 46 + t * 15) + '" text-anchor="middle" font-size="12" ' +
            'font-weight="' + (sep ? '600' : 'bold') + '" fill="' + fill + '">' + lines[t] + '</text>';
     }
   }
