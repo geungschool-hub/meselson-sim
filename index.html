@@ -50,9 +50,13 @@ try {
   /* ★질소 색 — 활동 전체에서 이 두 색만 쓴다.
      같은 색조의 진하기 차이로 「무겁다 / 가볍다」를 읽게 한다.
      범례·가닥·띠·표가 모두 이 값에서 나온다. */
-  --n15:#42267A;   --n15-bg:#ECE6F5;   /* 무거운 질소 ¹⁵N — ★JS 의 C_N15 와 같은 값이어야 한다 */
-  --n14:#C9B6E8;   --n14-bg:#F7F2FC;   /* 가벼운 질소 ¹⁴N — ★JS 의 C_N14 와 같은 값이어야 한다 */
-  --n14-ink:#7A5FA8;                   /* --n14 는 글자로 쓰기엔 너무 옅다. 글자용 짙은 짝 */
+  /* ★2026-08-26 교사 지시: 「¹⁴N 을 연보라로 하니 잘 안 보인다. 확 다른 색, 채도가 높은 색으로」
+     → 진보라(¹⁵N) ↔ 선명한 청록(¹⁴N). 두 색을 섞은 중간색도 뚜렷한 남청색이라 중간 띠가 산다.
+     ⚠ 두 색은 2형 색각에서 가까워질 수 있다 — 그래서 ¹⁵N 칸에는 **흰 점**을 함께 찍는다(색 단독 전달 금지). */
+  --n15:#3B1E87;   --n15-bg:#E8E3F6;   /* 무거운 질소 ¹⁵N — ★JS 의 C_N15 와 같은 값이어야 한다 */
+  --n14:#00B8A9;   --n14-bg:#DFF7F4;   /* 가벼운 질소 ¹⁴N — ★JS 의 C_N14 와 같은 값이어야 한다 */
+  --n14-ink:#00776C;                   /* --n14 는 글자로 쓰기엔 밝다. 글자용 짙은 짝 */
+  --nmid:#1E6B98;  --nmid-bg:#E3EEF6;  /* 두 색을 f15=0.5 로 섞은 값 = 중간 무게 */
 
   /* 모델별 고유색 — 예상표·튜브 테두리·배지가 모두 이 색을 쓴다 */
   --m1:#C2185B; --m1-bg:#FCE4EC;   /* 보존적 */
@@ -169,6 +173,26 @@ svg.stage{display:block;width:100%;min-width:600px;height:auto;touch-action:mani
 .anibar .btn{min-height:44px;padding:8px 12px;font-size:16px;}  /* ★단추 글자는 16px 아래로 내리지 않는다 */
 .anistep{font-size:14.5px;color:var(--sub);margin-left:2px;flex:1 1 170px;min-width:170px;}
 .anistep b{color:var(--ink);font-weight:700;}
+
+/* ── 조성표(③) — 열 성격을 색으로 나눈다 ────────────────────────
+   ★오른쪽(조작) 칸에 두었다가 6열이 잘려 안 보였다(2026-08-26 교사 지적).
+     왼쪽(자료) 칸으로 옮기고, 머리글에 「무거운 / 중간 / 가벼운」 부제를 붙여
+     표만 보고도 어느 열이 어느 띠인지 알게 했다. */
+table.t.compo th{padding:7px 6px;line-height:1.35;}
+table.t.compo th .thsub{display:block;font-size:11.5px;font-weight:600;opacity:.8;margin-top:2px;}
+table.t.compo th.n15{background:var(--n15-bg); color:var(--n15);}
+table.t.compo th.nmid{background:var(--nmid-bg);color:var(--nmid);}
+table.t.compo th.n14{background:var(--n14-bg); color:var(--n14-ink);}
+table.t.compo th.nmix{background:#F0F2F5;      color:var(--sub);}
+table.t.compo td{font-size:16px;}
+/* 0이 아닌 칸만 눈에 들어오게 — 「—」가 표를 채우면 어디를 볼지 알 수 없다 */
+table.t.compo td.zero{color:#B9BFC8;}
+table.t.compo td.has{font-weight:800;}
+table.t.compo td.has.n15{background:var(--n15-bg); color:var(--n15);}
+table.t.compo td.has.nmid{background:var(--nmid-bg);color:var(--nmid);}
+table.t.compo td.has.n14{background:var(--n14-bg); color:var(--n14-ink);}
+table.t.compo td.has.nmix{background:#F0F2F5;}
+table.t.compo tr.now td{box-shadow:inset 0 0 0 2px var(--yellow);}
 
 /* ── ① 세 복제모델 도해 카드 3장 ──────────────────
    ★.mcard svg 의 max-width 를 빼지 말 것 — 빼면 300×132 도해가 카드 너비까지
@@ -310,11 +334,21 @@ footer{text-align:center;margin-top:22px;}
    자리 잡는 <g> 는 밖, 도는 <g> 는 안. 도는 쪽에는 transform 속성을 주지 않는다.
    transform-box:fill-box 라야 제 몸 가운데를 축으로 돈다(기본값 view-box 면 무대 한가운데를 축으로 크게 휘돈다).
    ★단계를 손으로 넘길 수 있으므로 횟수를 정하지 않고 infinite 로 둔다. */
+/* ── ③ 무대의 이동 애니메이션 ────────────────────────────────
+   ★chromolab 은 framer-motion 이 `animate={{left,top}}` 로 미끄러뜨린다.
+     여기서는 **가닥마다 <g> 를 고정해 두고 transform 만 바꾸면** CSS 가 같은 일을 한다.
+     그래서 국면이 바뀌어도 노드를 새로 만들면 안 된다 — 새 노드는 전환 없이 튀어나온다.
+   ★transform 은 SVG **속성**으로 준다(CSS transform 이 아니다). 속성도 transition 이 걸린다. */
+.rmove{transition:transform .85s cubic-bezier(.4,0,.2,1), opacity .45s ease;}
+/* 분자 라벨 두 줄 — JS 가 class 이름으로 찾아 글자를 갈아 끼운다 */
+.rmove .ln{font-weight:700;}
+.rmove .ls{fill:var(--sub);}
+.rfade{transition:opacity .45s ease;}
 .spinning{animation:spinC .7s linear infinite;transform-box:fill-box;transform-origin:center;}
 @keyframes settleDown{from{opacity:0;}to{opacity:1;}}
 .settling{animation:settleDown .6s ease-out;}
 @media (prefers-reduced-motion: reduce){
-  .ani-fade,.ani-move{transition:none !important;}
+  .ani-fade,.ani-move,.rmove,.rfade{transition:none !important;}
   .spinning,.settling{animation:none !important;}
 }
 
@@ -455,6 +489,23 @@ html:not(.unlocked) #draftGate{display:flex;}
         <div id="repAni"></div>
         <h3 style="margin-bottom:6px;">이 모델이 예상하는 원심분리 결과</h3>
         <div class="stage-wrap"><div id="repTubes"></div></div>
+        <!-- ★조성표는 「자료」다 → 왼쪽 칸에 둔다. 오른쪽(조작) 칸은 440px 이라 6열이 잘렸다. -->
+        <h3 style="margin-bottom:6px;margin-top:16px;">세대별 DNA 분자의 조성</h3>
+        <div class="tbl-outer">
+          <table class="t compo">
+            <thead><tr>
+              <th style="width:70px;">세대</th><th style="width:88px;">분자 수</th>
+              <th class="n15"><sup>15</sup>N–<sup>15</sup>N<span class="thsub">무거운 DNA</span></th>
+              <th class="nmid"><sup>14</sup>N–<sup>15</sup>N<span class="thsub">중간 무게</span></th>
+              <th class="n14"><sup>14</sup>N–<sup>14</sup>N<span class="thsub">가벼운 DNA</span></th>
+              <th class="nmix">섞임<span class="thsub">가닥 안에서 섞임</span></th>
+            </tr></thead>
+            <tbody id="repTbody"></tbody>
+          </table>
+        </div>
+        <div class="msg info" style="font-size:14.5px;">
+          📌 띠에서 읽을 것은 두 가지이다. <b>띠의 높이는 밀도</b>를, <b>띠의 굵기는 그 무게를 가진 DNA의 양</b>을 나타낸다.
+        </div>
       </div>
       <div class="pane-r">
        <div class="pr-do">
@@ -465,18 +516,6 @@ html:not(.unlocked) #draftGate{display:flex;}
         </p>
         <div class="taskbar">모델을 하나 고르시오 — 셋을 모두 굴려야 다음이 열린다.</div>
         <div class="chips" id="repChips"></div>
-        <div class="tbl-outer">
-          <table class="t">
-            <thead><tr>
-              <th style="width:72px;">세대</th><th style="width:76px;">분자 수</th>
-              <th><sup>15</sup>N–<sup>15</sup>N</th><th><sup>14</sup>N–<sup>15</sup>N</th><th><sup>14</sup>N–<sup>14</sup>N</th><th>섞임</th>
-            </tr></thead>
-            <tbody id="repTbody"></tbody>
-          </table>
-        </div>
-        <div class="msg info" style="font-size:14.5px;">
-          📌 띠에서 읽을 것은 두 가지이다. <b>띠의 높이는 밀도</b>를, <b>띠의 굵기는 그 무게를 가진 DNA의 양</b>을 나타낸다.
-        </div>
        </div>
        <div class="pr-q">
         <div class="msg info" id="repQlock">🔒 세 모델을 모두 굴리면 결론 문항이 열린다.</div>
@@ -590,8 +629,8 @@ html:not(.unlocked) #draftGate{display:flex;}
 var DISP_G2_AT_MIDDLE = false;
 
 /* ── 질소 색 — CSS 변수와 **손으로 맞춰야 한다**. 검사가 이 짝을 문다. ── */
-var C_N15 = '#42267A';   /* 무거운 질소 ¹⁵N */
-var C_N14 = '#C9B6E8';   /* 가벼운 질소 ¹⁴N */
+var C_N15 = '#3B1E87';   /* 무거운 질소 ¹⁵N — ★CSS --n15 와 같아야 한다 */
+var C_N14 = '#00B8A9';   /* 가벼운 질소 ¹⁴N — ★CSS --n14 와 같아야 한다 (2026-08-26 교사 지시로 채도를 올렸다) */
 var C_GEAR = '#8A93A6';  /* 기구 — DNA 에는 절대 쓰지 않는다 */
 var C_GEARD = '#5A616C';
 var C_OK = '#2A7A38';
@@ -721,7 +760,11 @@ function molKind(m){
 
 /* 띠 좌표 — 튜브 로컬. y 는 아래로 갈수록 크다 = 무거울수록 아래. */
 function bandY(f15){ return 34 + 60 * f15; }
-function bandT(ratio){ return 5 + 11 * ratio; }
+/* ★굵기 = 그 무게를 가진 DNA의 **양**. 2026-08-26 교사 지시로 차이를 크게 벌렸다 —
+   옛 식 `5 + 11·r` 은 3/4 대 1/4 가 13.25 : 7.75(1.7배)뿐이라 눈에 들어오지 않았다.
+   새 식은 19.5 : 8.5(2.3배)다. 바닥값 3 은 「띠가 있긴 하다」를 보이게 하는 최소값이고,
+   최대 25 는 시험관 아래 곡면을 넘지 않는 한계다(반지름 26). 이 두 값을 넘기지 말 것. */
+function bandT(ratio){ return 3 + 22 * ratio; }
 /* 띠 색 — 두 질소 색 사이를 f15 로 섞는다.
    ★칸으로 쪼개지 않는다. 쪼개 그리면 「이 띠 안에 무거운 것과 가벼운 것이 반반 있다」로 읽혀
      최우선 오개념(M-01)을 앱이 스스로 심는다. 중간 무게의 DNA 는 분자 하나하나가 중간이다. */
@@ -831,7 +874,10 @@ function tubeSvg(x, y, sc, bands, opt){
   for (var t = 0; t < ticks.length; t++){
     g += '<line x1="-26" y1="' + ticks[t][0] + '" x2="26" y2="' + ticks[t][0] + '" ' +
          'stroke="' + C_GEAR + '" stroke-width="1" stroke-dasharray="3,3" opacity=".6"></line>';
-    if (opt.labels){
+    if (opt.labelsLeft){
+      /* ★눈금 이름을 왼쪽에 둘 수도 있어야 한다 — 오른쪽에 띠의 개수를 적는 무대가 있다 */
+      g += '<text x="-34" y="' + (ticks[t][0] + 4) + '" text-anchor="end" font-size="12.5" fill="#555">' + ticks[t][1] + '</text>';
+    } else if (opt.labels){
       g += '<text x="34" y="' + (ticks[t][0] + 4) + '" font-size="12.5" fill="#555">' + ticks[t][1] + '</text>';
     }
   }
@@ -847,7 +893,7 @@ function tubeSvg(x, y, sc, bands, opt){
     for (var i = 0; i < bands.length; i++){
       var b = bands[i], cy = bandY(b.f15), th = bandT(b.ratio);
       g += '<rect x="-24" y="' + (cy - th / 2) + '" width="48" height="' + th + '" rx="2.5" ' +
-           'fill="' + bandColor(b.f15) + '" stroke="#3A3F4A" stroke-width=".8" opacity="' + (0.55 + 0.45 * b.ratio) + '"></rect>';
+           'fill="' + bandColor(b.f15) + '" stroke="#2B2F38" stroke-width="1.1" opacity="' + (0.78 + 0.22 * b.ratio) + '"></rect>';
     }
   }
   if (opt.tag){
@@ -1155,7 +1201,9 @@ function balStageSvg(c){
     g += '</g></g>';
   }
 
-  g += tubeSvg(536, 44, 1.15, (ph >= 5) ? [{ f15:f, ratio:1 }] : (ph === 4 ? [{ f15:f, ratio:1 }] : []),
+  /* ★x 를 오른쪽으로 더 밀지 말 것 — 눈금 이름(「중간 무게의 DNA」)이 1.15배로 커져
+     무대 오른쪽 끝(680)을 넘어 잘린다(2026-08-26 눈 확인). 500 이 한계다. */
+  g += tubeSvg(500, 44, 1.15, (ph >= 5) ? [{ f15:f, ratio:1 }] : (ph === 4 ? [{ f15:f, ratio:1 }] : []),
                { labels:true, dots:(ph === 4) });
 
   var CAPS = {
@@ -1266,108 +1314,343 @@ function balRun(){
 /* ══════════════════════════════════════════════════════════════
    7. 무대 ③ — 세 모델을 굴린다
    ══════════════════════════════════════════════════════════════ */
+var REP_W = 680, REP_H = 344;
 var REP_ROW = { P:44, G1:126, G2:208 };
 var REP_X = { P:[272], G1:[192, 352], G2:[32, 192, 352, 512] };
+var DUPLEX_H = 2 * CELL_H + STRAND_GAP;          /* 24 — 이중나선 한 개의 높이 */
+
+/* ══════════════════════════════════════════════════════════════
+   ★가닥 대본 — 「어느 가닥이 어느 자리로 가는가」
+   이 표가 이 무대의 전부다. 슬롯마다 [위 가닥 key, 아래 가닥 key] 를 적는다.
+   **key 가 세대를 건너 같으면 그 가닥은 사라졌다 다시 그려지는 것이 아니라 미끄러져 이동한다.**
+   (chromolab 의 방식 — 염색체마다 key 를 고정하고 위치만 애니메이션한다.)
+
+   그래서 학생이 눈으로 좇을 수 있다 —
+   · 반보존적: 어버이 가닥 A·B 가 **끝까지 살아남아** 서로 다른 딸 분자로 갈라져 들어간다.
+   · 보존적  : A·B 가 **한 번도 떨어지지 않고** 짝을 유지한 채 내려간다.
+   · 분산적  : 어버이 가닥이 **조각나 사라지고** 세대마다 새 가닥이 생긴다(key 가 이어지지 않는다).
+
+   ⚠ 칸(H/L)은 여기 적지 않는다 — `MODELS` 에서 읽는다(정본은 하나여야 한다).
+      검사가 「같은 key 는 세대가 바뀌어도 칸이 같다」를 문다.
+   ══════════════════════════════════════════════════════════════ */
+var REP_CAST = {
+  cons: { dup:'copy',
+    G0:[['A','B']],
+    G1:[['A','B'], ['n1','n2']],
+    G2:[['A','B'], ['n3','n4'], ['n1','n2'], ['n5','n6']] },
+  semi: { dup:'unzip',
+    G0:[['A','B']],
+    G1:[['A','n1'], ['n2','B']],
+    G2:[['A','n3'], ['n1','n4'], ['n5','B'], ['n2','n6']] },
+  disp: { dup:'shatter',
+    G0:[['A','B']],
+    G1:[['p1','p2'], ['p3','p4']],
+    G2:[['q1','q2'], ['q3','q4'], ['q5','q6'], ['q7','q8']] }
+};
+/* 복제 국면에서 어버이 자리에 겹쳐 놓는 두 딸 분자의 세로 어긋남 */
+var DUP_DY = { unzip:[-14, 26], copy:[0, 40], shatter:[-14, 26] };
+
+function repCast(id){ return REP_CAST[id]; }
+function repSlots(id, gen){ var c = repCast(id); return c ? c['G' + gen] : []; }
+/* key → 그 가닥의 칸. MODELS 에서 읽는다. 처음 나타나는 자리의 값이 그 가닥의 정체다. */
+function repCellsOf(id, key){
+  for (var gen = 0; gen <= 2; gen++){
+    var slots = repSlots(id, gen), mols = molsOf(id, gen);
+    for (var i = 0; i < slots.length; i++){
+      if (slots[i][0] === key) return mols[i].top;
+      if (slots[i][1] === key) return mols[i].bot;
+    }
+  }
+  return null;
+}
+function repKeys(id){
+  var seen = {}, out = [];
+  for (var gen = 0; gen <= 2; gen++){
+    var slots = repSlots(id, gen);
+    for (var i = 0; i < slots.length; i++){
+      for (var s = 0; s < 2; s++){
+        var k = slots[i][s];
+        if (!seen[k]){ seen[k] = 1; out.push(k); }
+      }
+    }
+  }
+  return out;
+}
+
+/* ══ 국면 → 화면에 놓인 이중나선 목록 ══
+   assembled = 조립된 분자(라벨을 붙인다) · forming = 복제 중(라벨을 붙이지 않는다)
+   ★복제 중인 두 딸 분자는 **어버이가 있던 x 에 겹쳐** 놓는다.
+     그래야 다음 국면에서 제자리로 미끄러질 때 「여기서 나왔다」가 보인다. */
+function repFrame(id, ph){
+  var c = repCast(id);
+  if (!c) return { duplexes:[], mode:'none', gen:0 };
+  var out = [], i;
+  if (ph <= 1){
+    for (i = 0; i < c.G0.length; i++) out.push({ slot:i, gen:0, x:REP_X.P[i], y:REP_ROW.P, keys:c.G0[i] });
+    return { duplexes:out, mode:'assembled', gen:0 };
+  }
+  if (ph === 3){
+    for (i = 0; i < c.G1.length; i++) out.push({ slot:i, gen:1, x:REP_X.G1[i], y:REP_ROW.G1, keys:c.G1[i] });
+    return { duplexes:out, mode:'assembled', gen:1 };
+  }
+  if (ph >= 5){
+    for (i = 0; i < c.G2.length; i++) out.push({ slot:i, gen:2, x:REP_X.G2[i], y:REP_ROW.G2, keys:c.G2[i] });
+    return { duplexes:out, mode:'assembled', gen:2 };
+  }
+  /* ph 2 = P → G1 · ph 4 = G1 → G2 */
+  var childGen = (ph === 2) ? 1 : 2;
+  var parentX  = (ph === 2) ? REP_X.P : REP_X.G1;
+  var rowY     = (ph === 2) ? REP_ROW.P : REP_ROW.G1;
+  var kids     = (ph === 2) ? c.G1 : c.G2;
+  var dy = DUP_DY[c.dup];
+  for (i = 0; i < kids.length; i++){
+    var parent = Math.floor(i / 2);
+    out.push({ slot:i, gen:childGen, x:parentX[parent], y:rowY + dy[i % 2], keys:kids[i], forming:true });
+  }
+  return { duplexes:out, mode:'forming', gen:childGen, parents:parentX, rowY:rowY };
+}
+
+/* ══ 가닥 하나의 국면별 자리 ══
+   놓이지 않는 국면에서는 **가장 가까운 놓이는 국면의 자리에 투명하게** 둔다.
+   그래야 「없는 데서 날아오는」 일 없이 제자리에서 스르르 나타나고 사라진다. */
+function repStrandPos(id, key, ph){
+  function at(p){
+    var f = repFrame(id, p);
+    for (var i = 0; i < f.duplexes.length; i++){
+      var d = f.duplexes[i];
+      if (d.keys[0] === key) return { x:d.x, y:d.y };
+      if (d.keys[1] === key) return { x:d.x, y:d.y + CELL_H + STRAND_GAP };
+    }
+    return null;
+  }
+  var here = at(ph);
+  if (here) return { x:here.x, y:here.y, op:1 };
+  var p;
+  for (p = ph - 1; p >= 0; p--){ var b = at(p); if (b) return { x:b.x, y:b.y, op:0 }; }
+  for (p = ph + 1; p <= 5; p++){ var a = at(p); if (a) return { x:a.x, y:a.y, op:0 }; }
+  return { x:REP_X.P[0], y:REP_ROW.P, op:0 };
+}
+
+/* ══ 무대 전체의 국면 상태 — 순수 함수. 검사는 이것을 문다. ══ */
+function repLayout(id, ph){
+  var m = modelById(id);
+  if (!m) return null;
+  var f = repFrame(id, ph);
+  var strands = [], keys = repKeys(id), i;
+  for (i = 0; i < keys.length; i++){
+    var pos = repStrandPos(id, keys[i], ph);
+    strands.push({ key:keys[i], cells:repCellsOf(id, keys[i]), x:pos.x, y:pos.y, op:pos.op });
+  }
+  /* 라벨은 조립된 분자에만 붙인다 — 복제 중인 것에 「¹⁴N-¹⁵N」을 달면 거짓말이 된다 */
+  var labels = [];
+  for (i = 0; i < f.duplexes.length; i++){
+    var d = f.duplexes[i];
+    var mol = molsOf(id, d.gen)[d.slot];
+    labels.push({ slot:'g' + d.gen + '_' + d.slot, x:d.x + MOL_W / 2, y:d.y + DUPLEX_H,
+                  name:molName(mol), sub:'¹⁵N ' + hOfMol(mol) + ' / 16 칸',
+                  color:bandColor(f15Of(mol)), op:(f.mode === 'assembled') ? 1 : 0 });
+  }
+  /* ¹⁵N 칸 합계 — 어느 모델·어느 세대에서나 언제나 16 */
+  var shown = (ph >= 5) ? 2 : (ph >= 3 ? 1 : 0);
+  var mols = molsOf(id, shown), sum = 0;
+  for (i = 0; i < mols.length; i++) sum += hOfMol(mols[i]);
+  return {
+    strands:strands, labels:labels, mode:f.mode, gen:f.gen, sum:sum,
+    med15:(ph === 0), anno:(f.mode === 'forming') ? c_annoKey(id, ph) : null,
+    /* ★국면 2 부터는 「어버이 세대(P)」 이름표를 내린다 — 지퍼가 열리며 위 가닥이 그 자리로 올라와 겹친다 */
+    rowP:(ph <= 1), rowG1:(ph >= 3), rowG2:(ph >= 5),
+    ghost0:(ph >= 3), ghost1:(ph >= 5),
+    cap:String(repCapOf(m, ph)).split('|')
+  };
+}
+function c_annoKey(id, ph){ return 'a' + ph; }
+function repCapOf(m, ph){
+  var CAPS = {
+    0:'¹⁵N 배지에서 만든 DNA 이다.|두 가닥 모두 ¹⁵N 이다.',
+    1:'배지를 ¹⁴N 으로 바꾼다. 이미 있는|DNA 는 그대로이다.',
+    2:m.cap1, 3:m.capG1, 4:m.cap2, 5:m.capG2
+  };
+  return CAPS[ph] || '';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   무대를 **한 번만** 짓는다. 국면이 바뀌면 transform·opacity 만 바꾼다.
+   ★국면마다 innerHTML 을 다시 넣으면 노드가 새로 생겨 CSS transition 이 걸리지 않는다
+     — 그래서 분자가 「튀어나왔다」(2026-08-26 교사 지적).
+   ══════════════════════════════════════════════════════════════ */
 function repStageSvg(id){
-  var W = 680, H = 336;
-  var g = svgOpen(W, H, '세 복제모델의 복제 과정 무대');
+  var g = svgOpen(REP_W, REP_H, id ? (modelById(id).name + ' 복제 과정 무대') : '복제 과정 무대');
   if (!id){
     g += '<text x="340" y="160" text-anchor="middle" font-size="16" fill="#98A0AC">' +
          '모델을 하나 고르시오</text></svg>';
     return g;
   }
-  var m = modelById(id), ph = aniOf('rep', id), seam = (id === 'disp');
+  var seam = (id === 'disp');
 
-  /* 배지 띠 — 국면 0 은 ¹⁵N, 국면 1부터 ¹⁴N */
-  var med15 = (ph === 0);
-  g += '<rect x="0" y="0" width="' + W + '" height="26" fill="' + (med15 ? C_N15 : C_N14) + '" opacity="' + (med15 ? '.18' : '.34') + '"></rect>';
-  g += '<text x="12" y="18" font-size="13" font-weight="bold" fill="' + (med15 ? C_N15 : '#3A3F4A') + '">' +
-       (med15 ? '¹⁵N 배지' : '¹⁴N 배지 — 새로 만드는 가닥은 모두 ¹⁴N 이다') + '</text>';
+  /* 배지 띠 */
+  g += '<rect id="rs_med" x="0" y="0" width="' + REP_W + '" height="26" fill="' + C_N15 + '" opacity=".18"></rect>';
+  g += '<text id="rs_medtx" x="12" y="18" font-size="13" font-weight="bold" fill="' + C_N15 + '">¹⁵N 배지</text>';
+  g += '<text id="rs_sum" x="' + (REP_W - 12) + '" y="44" text-anchor="end" font-size="13" fill="' + C_N15 + '"></text>';
 
-  /* ¹⁵N 칸 세기 — 어느 모델이든 세대 합은 언제나 16 이다 */
-  var shown = (ph >= 5) ? 'G2' : (ph >= 3 ? 'G1' : 'P');
-  var mols = molsOf(id, shown === 'P' ? 0 : (shown === 'G1' ? 1 : 2));
-  var sum = 0;
-  for (var s = 0; s < mols.length; s++) sum += hOfMol(mols[s]);
-  g += '<text x="' + (W - 12) + '" y="44" text-anchor="end" font-size="13" fill="' + C_N15 + '">' +
-       '¹⁵N 칸 모두 ' + sum + ' 개 — 늘지 않는다</text>';
+  /* 행 이름 */
+  g += '<text id="rs_rowP" class="rfade" x="' + (REP_X.P[0] + MOL_W / 2) + '" y="' + (REP_ROW.P - 8) +
+       '" text-anchor="middle" font-size="12.5" fill="#777">어버이 세대(P)</text>';
+  g += '<text id="rs_rowG1" class="rfade" x="12" y="' + (REP_ROW.G1 + 16) + '" font-size="12.5" font-weight="bold" fill="#777">G1</text>';
+  g += '<text id="rs_rowG2" class="rfade" x="12" y="' + (REP_ROW.G2 + 16) + '" font-size="12.5" font-weight="bold" fill="#777">G2</text>';
 
-  /* P 행 */
-  g += '<g transform="translate(' + REP_X.P[0] + ',' + REP_ROW.P + ')">' +
-       molSvg(0, 0, MOL_P[0], { label:true, fade:(ph >= 3 ? '.3' : null) }) + '</g>';
-  if (ph < 3) g += '<text x="' + (REP_X.P[0] + MOL_W / 2) + '" y="' + (REP_ROW.P - 8) + '" text-anchor="middle" font-size="12.5" fill="#777">어버이 세대(P)</text>';
+  /* 지나간 세대의 자취 + 혈통선 — 가닥보다 먼저 그려 뒤에 깔린다 */
+  g += repGhostSvg(id, 0) + repGhostSvg(id, 1);
 
-  /* 국면 2·4 — 모델마다 다른 「동작」. 이 그림이 다르지 않으면 활동이 실패한다. */
-  function actAt(rowY, srcMol, targets){
-    var s = '';
-    if (id === 'cons'){
-      /* 원본은 한 번도 벌어지지 않는다. 옆에 새 분자를 따로 만든다. */
-      s += '<g transform="translate(' + targets[0] + ',' + rowY + ')">' + molSvg(0, 0, srcMol, {}) + '</g>';
-      s += '<path d="M' + (targets[0] + MOL_W + 8) + ',' + (rowY + 12) + ' L' + (targets[1] - 8) + ',' + (rowY + 12) + '" ' +
-           'stroke="' + C_GEARD + '" stroke-width="2" stroke-dasharray="6,4"></path>';
-      s += '<text x="' + ((targets[0] + MOL_W + targets[1]) / 2) + '" y="' + (rowY + 4) + '" text-anchor="middle" font-size="12" fill="' + C_GEARD + '">보고 베낀다</text>';
-      s += '<g transform="translate(' + targets[1] + ',' + rowY + ')">' +
-           strandSvg(0, 0, 'LLLL', {}) + strandSvg(0, CELL_H + STRAND_GAP, 'LLLL', {}) + '</g>';
-    } else if (id === 'semi'){
-      /* 지퍼가 열린다 — 두 가닥이 벌어지고 그 사이에 ¹⁴N 칸이 붙는다 */
-      s += '<g transform="translate(' + targets[0] + ',' + rowY + ')">' + molSvg(0, 0, srcMol, { split:34 }) + '</g>';
-      s += '<text x="' + (targets[0] - 6) + '" y="' + (rowY + 8) + '" text-anchor="end" font-size="11.5" fill="#555">주형</text>';
-      s += '<text x="' + (targets[0] - 6) + '" y="' + (rowY + 50) + '" text-anchor="end" font-size="11.5" fill="#555">주형</text>';
-      s += '<g transform="translate(' + targets[0] + ',' + (rowY + 12) + ')">' + strandSvg(0, 0, 'LLLL', {}) + '</g>';
-      s += '<g transform="translate(' + targets[0] + ',' + (rowY + 31) + ')">' + strandSvg(0, 0, 'LLLL', {}) + '</g>';
-      s += '<path d="M' + (targets[0] + MOL_W + 10) + ',' + (rowY + 26) + ' l14,0" stroke="' + C_GEARD + '" stroke-width="2"></path>';
-      s += '<path d="M' + (targets[0] + MOL_W + 22) + ',' + (rowY + 21) + ' l8,5 l-8,5 Z" fill="' + C_GEARD + '"></path>';
-      s += '<text x="' + (targets[0] + MOL_W + 60) + '" y="' + (rowY + 46) + '" text-anchor="middle" font-size="11.5" fill="#555">풀리는 방향</text>';
-    } else {
-      /* 잘리고 섞인다 — 조각이 흩어졌다가 다시 이어진다 (고정 좌표. 난수를 쓰지 않는다) */
-      var SC = [[-64,-14],[-40,-2],[-18,-18],[4,-6],[26,-20],[48,-8],[-52,12],[-30,22],
-                [-8,10],[14,24],[36,12],[58,22],[-72,4],[-22,-30],[22,-32],[70,2]];
-      var cx = 340, cy = rowY + 12;
-      for (var k = 0; k < SC.length; k++){
-        var heavy = (k % 2 === 0);
-        s += '<rect x="' + (cx + SC[k][0]) + '" y="' + (cy + SC[k][1]) + '" width="' + CELL_W + '" height="' + CELL_H + '" ' +
-             'fill="' + (heavy ? C_N15 : C_N14) + '" stroke="#fff" stroke-width=".8"></rect>';
-        if (heavy) s += '<circle cx="' + (cx + SC[k][0] + CELL_W / 2) + '" cy="' + (cy + SC[k][1] + CELL_H / 2) + '" r="1.7" fill="#fff" opacity=".9"></circle>';
-      }
-      s += '<text x="340" y="' + (rowY + 62) + '" text-anchor="middle" font-size="11.5" fill="#555">조각이 흩어져 섞인다</text>';
-    }
-    return s;
+  /* 복제 국면 주석 — 국면마다 켜고 끈다 */
+  g += repAnnoSvg(id, 2) + repAnnoSvg(id, 4);
+
+  /* ★가닥 — key 마다 <g> 하나. 이 <g> 들은 다시 만들어지지 않는다. */
+  var keys = repKeys(id);
+  for (var i = 0; i < keys.length; i++){
+    g += '<g id="rs_s_' + keys[i] + '" class="rmove">' + strandSvg(0, 0, repCellsOf(id, keys[i]), { seam:seam }) + '</g>';
   }
-  if (ph === 2) g += actAt(REP_ROW.G1, MOL_P[0], REP_X.G1);
-  if (ph === 4) g += actAt(REP_ROW.G2, m.G1[0], [REP_X.G2[0], REP_X.G2[1]]);
-
-  /* G1 행 */
-  if (ph >= 3){
-    for (var i = 0; i < m.G1.length; i++){
-      g += '<g transform="translate(' + REP_X.G1[i] + ',' + REP_ROW.G1 + ')">' +
-           molSvg(0, 0, m.G1[i], { label:true, seam:seam, fade:(ph >= 5 ? '.35' : null) }) + '</g>';
+  /* 분자 라벨 */
+  for (var gen = 0; gen <= 2; gen++){
+    var slots = repSlots(id, gen);
+    for (var s = 0; s < slots.length; s++){
+      g += '<g id="rs_l_g' + gen + '_' + s + '" class="rmove">' +
+             '<text class="ln" x="' + (MOL_W / 2) + '" y="15" text-anchor="middle" font-size="12.5" font-weight="bold"></text>' +
+             '<text class="ls" x="' + (MOL_W / 2) + '" y="29" text-anchor="middle" font-size="11.5" fill="#555"></text>' +
+           '</g>';
     }
-    g += '<text x="12" y="' + (REP_ROW.G1 + 16) + '" font-size="12.5" font-weight="bold" fill="#777">G1</text>';
   }
-  /* G2 행 */
-  if (ph >= 5){
-    for (var j = 0; j < m.G2.length; j++){
-      g += '<g transform="translate(' + REP_X.G2[j] + ',' + REP_ROW.G2 + ')">' +
-           molSvg(0, 0, m.G2[j], { label:true, seam:seam }) + '</g>';
-    }
-    g += '<text x="12" y="' + (REP_ROW.G2 + 16) + '" font-size="12.5" font-weight="bold" fill="#777">G2</text>';
-  }
-
-  var CAPS = {
-    0:'¹⁵N 배지에서 만든 DNA 이다.|두 가닥 모두 ¹⁵N 이다.',
-    1:'배지를 ¹⁴N 으로 바꾼다. 이미 있는|DNA 는 그대로이다.',
-    2:m.cap1,
-    3:m.capG1,
-    4:m.cap2,
-    5:m.capG2
-  };
-  if (CAPS[ph]) g += cap(340, (ph >= 5 ? 300 : 296), CAPS[ph]);
+  /* 무대 캡션 */
+  g += '<text id="rs_cap0" x="340" y="304" text-anchor="middle" font-size="14.5" fill="#555"></text>';
+  g += '<text id="rs_cap1" x="340" y="324" text-anchor="middle" font-size="14.5" fill="#555"></text>';
   g += '</svg>';
   return g;
 }
+
+/* ★지나간 세대의 자취와 혈통선 — 「이 분자가 저기서 나왔다」를 잇는다.
+   가닥은 아래 세대로 **이동해 버리므로** 윗줄이 텅 빈다. 흐린 자취를 남겨
+   가계도처럼 읽히게 한다(chromolab 의 방추사가 하던 일과 같은 몫이다). */
+function repGhostSvg(id, gen){
+  var px = (gen === 0) ? REP_X.P : REP_X.G1;
+  var cx = (gen === 0) ? REP_X.G1 : REP_X.G2;
+  var py = (gen === 0) ? REP_ROW.P : REP_ROW.G1;
+  var cy = (gen === 0) ? REP_ROW.G1 : REP_ROW.G2;
+  var mols = molsOf(id, gen), seam = (id === 'disp');
+  var s = '<g id="rs_ghost' + gen + '" class="rfade" opacity="0">';
+  for (var i = 0; i < mols.length; i++){
+    s += '<g transform="translate(' + px[i] + ',' + py + ')" opacity=".26">' +
+         molSvg(0, 0, mols[i], { seam:seam }) + '</g>';
+    for (var k = 0; k < 2; k++){
+      var c = 2 * i + k;
+      if (cx[c] === undefined) continue;
+      s += '<path d="M' + (px[i] + MOL_W / 2) + ',' + (py + DUPLEX_H + 3) +
+           ' L' + (cx[c] + MOL_W / 2) + ',' + (cy - 7) + '" stroke="' + C_GEAR +
+           '" stroke-width="1.4" stroke-dasharray="4,4" opacity=".65" fill="none"></path>';
+    }
+  }
+  return s + '</g>';
+}
+
+/* 복제 국면의 주석 — 모델마다 「무슨 일이 일어나는가」를 그림으로 말한다 */
+function repAnnoSvg(id, ph){
+  var c = repCast(id), rowY = (ph === 2) ? REP_ROW.P : REP_ROW.G1;
+  var xs = (ph === 2) ? REP_X.P : REP_X.G1;
+  var dy = DUP_DY[c.dup], s = '<g id="rs_anno' + ph + '" class="rfade">';
+  for (var k = 0; k < xs.length; k++){
+    var x = xs[k];
+    if (c.dup === 'unzip'){
+      /* 지퍼가 열린다 — 갈라지는 두 가닥에 「주형」을 붙이고 사이를 벌린다 */
+      s += '<path d="M' + (x - 16) + ',' + (rowY + dy[0] + 12) + ' Q' + (x - 30) + ',' + (rowY + 12) + ' ' +
+           (x - 16) + ',' + (rowY + dy[1] + 12) + '" fill="none" stroke="' + C_GEARD + '" stroke-width="1.6" stroke-dasharray="4,3"></path>';
+      s += '<text x="' + (x - 22) + '" y="' + (rowY + dy[0] + 6) + '" text-anchor="end" font-size="11.5" fill="#555">주형</text>';
+      s += '<text x="' + (x - 22) + '" y="' + (rowY + dy[1] + 26) + '" text-anchor="end" font-size="11.5" fill="#555">주형</text>';
+      s += '<text x="' + (x + MOL_W + 8) + '" y="' + (rowY + 14) + '" font-size="11.5" fill="' + C_N14 + '" font-weight="bold">새 ¹⁴N 가닥이</text>';
+      s += '<text x="' + (x + MOL_W + 8) + '" y="' + (rowY + 28) + '" font-size="11.5" fill="' + C_N14 + '" font-weight="bold">각각 붙는다</text>';
+    } else if (c.dup === 'copy'){
+      /* 원본은 손대지 않는다 — 아래에 새 분자를 따로 만든다 */
+      s += '<path d="M' + (x - 14) + ',' + (rowY + 12) + ' L' + (x - 14) + ',' + (rowY + dy[1] + 12) + '" ' +
+           'fill="none" stroke="' + C_GEARD + '" stroke-width="1.6" stroke-dasharray="5,4"></path>';
+      s += '<path d="M' + (x - 19) + ',' + (rowY + dy[1] + 6) + ' L' + (x - 14) + ',' + (rowY + dy[1] + 14) + ' L' + (x - 9) + ',' + (rowY + dy[1] + 6) + ' Z" fill="' + C_GEARD + '"></path>';
+      s += '<text x="' + (x + MOL_W + 8) + '" y="' + (rowY + 14) + '" font-size="11.5" fill="#555">원본은 열리지 않는다</text>';
+      s += '<text x="' + (x + MOL_W + 8) + '" y="' + (rowY + dy[1] + 14) + '" font-size="11.5" fill="' + C_N14 + '" font-weight="bold">두 가닥 모두 새것이다</text>';
+    } else {
+      /* 잘리고 섞인다 — 조각이 흩어진다 (고정 좌표. 난수를 쓰지 않는다) */
+      var SC = [[-58,-16],[-34,-3],[-12,-19],[10,-7],[32,-21],[54,-9],[-46,13],[-24,23],
+                [-2,11],[20,25],[42,13],[64,23],[-66,3],[-16,-31],[28,-33],[76,3]];
+      var cx = x + MOL_W / 2, cy = rowY + 12;
+      for (var q = 0; q < SC.length; q++){
+        var heavy = (q % 2 === 0);
+        s += '<rect x="' + (cx + SC[q][0]) + '" y="' + (cy + SC[q][1]) + '" width="' + CELL_W + '" height="' + CELL_H + '" ' +
+             'fill="' + (heavy ? C_N15 : C_N14) + '" stroke="#fff" stroke-width=".8"></rect>';
+        if (heavy) s += '<circle cx="' + (cx + SC[q][0] + CELL_W / 2) + '" cy="' + (cy + SC[q][1] + CELL_H / 2) + '" r="1.7" fill="#fff" opacity=".9"></circle>';
+      }
+      s += '<text x="' + cx + '" y="' + (rowY + 58) + '" text-anchor="middle" font-size="11.5" fill="#555">조각이 흩어져 섞인다</text>';
+    }
+  }
+  return s + '</g>';
+}
+
+/* ══ 국면 적용 — 여기서는 **속성만** 바꾼다. 노드를 새로 만들지 않는다. ══ */
+function repApplyPhase(id){
+  if (!id) return;
+  var L = repLayout(id, aniOf('rep', id));
+  if (!L) return;
+  function el(i){ return document.getElementById(i); }
+  function put(node, x, y, op){
+    if (!node || !node.setAttribute) return;
+    node.setAttribute('transform', 'translate(' + x + ',' + y + ')');
+    node.setAttribute('opacity', String(op));
+  }
+  var i, n;
+  for (i = 0; i < L.strands.length; i++){
+    var st = L.strands[i];
+    put(el('rs_s_' + st.key), st.x, st.y, st.op);
+  }
+  for (i = 0; i < L.labels.length; i++){
+    var lb = L.labels[i];
+    n = el('rs_l_' + lb.slot);
+    put(n, lb.x - MOL_W / 2, lb.y, lb.op);
+    if (n && n.children){
+      for (var c = 0; c < n.children.length; c++){
+        var ch = n.children[c], cls = ch.getAttribute ? ch.getAttribute('class') : '';
+        if (cls === 'ln'){ ch.textContent = lb.name; if (ch.setAttribute) ch.setAttribute('fill', lb.color); }
+        else if (cls === 'ls'){ ch.textContent = lb.sub; }
+      }
+    }
+  }
+  /* 라벨이 없는 세대의 라벨 상자는 꺼 둔다 */
+  for (var gen = 0; gen <= 2; gen++){
+    var slots = repSlots(id, gen);
+    for (var s2 = 0; s2 < slots.length; s2++){
+      var key = 'g' + gen + '_' + s2, on = false;
+      for (var j = 0; j < L.labels.length; j++) if (L.labels[j].slot === key) on = true;
+      if (!on){ n = el('rs_l_' + key); if (n && n.setAttribute) n.setAttribute('opacity', '0'); }
+    }
+  }
+  n = el('rs_med');
+  if (n && n.setAttribute){
+    n.setAttribute('fill', L.med15 ? C_N15 : C_N14);
+    n.setAttribute('opacity', L.med15 ? '.18' : '.30');
+  }
+  n = el('rs_medtx');
+  if (n){
+    n.textContent = L.med15 ? '¹⁵N 배지' : '¹⁴N 배지 — 새로 만드는 가닥은 모두 ¹⁴N 이다';
+    if (n.setAttribute) n.setAttribute('fill', L.med15 ? C_N15 : '#2C6F66');
+  }
+  n = el('rs_sum'); if (n) n.textContent = '¹⁵N 칸 모두 ' + L.sum + ' 개 — 늘지 않는다';
+  n = el('rs_rowP');  if (n && n.setAttribute) n.setAttribute('opacity', L.rowP ? '1' : '0');
+  n = el('rs_rowG1'); if (n && n.setAttribute) n.setAttribute('opacity', L.rowG1 ? '1' : '0');
+  n = el('rs_rowG2'); if (n && n.setAttribute) n.setAttribute('opacity', L.rowG2 ? '1' : '0');
+  n = el('rs_ghost0'); if (n && n.setAttribute) n.setAttribute('opacity', L.ghost0 ? '1' : '0');
+  n = el('rs_ghost1'); if (n && n.setAttribute) n.setAttribute('opacity', L.ghost1 ? '1' : '0');
+  n = el('rs_anno2'); if (n && n.setAttribute) n.setAttribute('opacity', L.anno === 'a2' ? '1' : '0');
+  n = el('rs_anno4'); if (n && n.setAttribute) n.setAttribute('opacity', L.anno === 'a4' ? '1' : '0');
+  n = el('rs_cap0'); if (n) n.textContent = L.cap[0] || '';
+  n = el('rs_cap1'); if (n) n.textContent = L.cap[1] || '';
+}
+
 /* 이 모델이 예상하는 원심분리 결과 — 세 세대를 나란히. 띠는 위 분자에서 계산된 것이다. */
 function repTubesSvg(id){
-  var W = 680, H = 196;
+  var W = 680, H = 210;
   var g = svgOpen(W, H, '이 모델이 예상하는 원심분리 결과');
   if (!id){
     g += '<text x="340" y="100" text-anchor="middle" font-size="15" fill="#98A0AC">모델을 굴리면 예상 띠가 그려진다</text></svg>';
@@ -1375,28 +1658,44 @@ function repTubesSvg(id){
   }
   var ph = aniOf('rep', id);
   var seen = { P:true, G1:(ph >= 3), G2:(ph >= 5) };
-  var cols = [['P', 0, 140], ['G1', 1, 340], ['G2', 2, 540]];
+  var cols = [['P', 0, 170], ['G1', 1, 366], ['G2', 2, 562]];
   for (var i = 0; i < cols.length; i++){
     var key = cols[i][0], gen = cols[i][1], x = cols[i][2];
     if (!seen[key]){
       g += '<rect x="' + (x - 30) + '" y="26" width="60" height="126" rx="8" fill="none" stroke="#D5D8DE" stroke-width="1.6" stroke-dasharray="5,5"></rect>';
       g += '<text x="' + x + '" y="96" text-anchor="middle" font-size="22" fill="#C0C6D0">?</text>';
     } else {
-      g += tubeSvg(x, 26, 1, (gen === 0) ? REAL_BANDS[0] : bandsFor(id, gen), { labels:(i === 0) });
+      var bs = (gen === 0) ? REAL_BANDS[0] : bandsFor(id, gen);
+      var total = molsOf(id, gen).length;
+      g += tubeSvg(x, 26, 1, bs, { labelsLeft:(i === 0) });
+      /* ★굵기가 무엇을 뜻하는지 글로도 적는다 — 굵기만으로는 몇 개인지 셀 수 없다 */
+      for (var b = 0; b < bs.length; b++){
+        var cy = 26 + bandY(bs[b].f15), n = Math.round(bs[b].ratio * total);
+        /* ★개수는 관의 **오른쪽**, 눈금 이름은 첫 관의 **왼쪽**에 둔다.
+           둘 다 오른쪽에 두었더니 「무거운 DNA」 글자와 겹쳤다(2026-08-26 눈 확인). */
+        g += '<line x1="' + (x + 26) + '" y1="' + cy + '" x2="' + (x + 34) + '" y2="' + cy + '" stroke="' + C_GEAR + '" stroke-width="1"></line>';
+        g += '<text x="' + (x + 38) + '" y="' + (cy + 4) + '" font-size="12" font-weight="bold" fill="' + bandColor(bs[b].f15) + '">' +
+             '분자 ' + n + ' 개</text>';
+      }
+      g += '<text x="' + x + '" y="190" text-anchor="middle" font-size="12.5" fill="#555">띠 ' + bs.length + ' 개 · 분자 ' + total + ' 개</text>';
     }
     g += '<text x="' + x + '" y="18" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#3A3F4A">' +
          (key === 'P' ? '어버이(P)' : (key === 'G1' ? '1세대(G1)' : '2세대(G2)')) + '</text>';
-    if (seen[key]){
-      var bs = (gen === 0) ? REAL_BANDS[0] : bandsFor(id, gen);
-      g += '<text x="' + x + '" y="184" text-anchor="middle" font-size="12.5" fill="#555">띠 ' + bs.length + ' 개</text>';
-    }
   }
   g += '</svg>';
   return g;
 }
+
+/* ★무대에 올라가 있는 모델. 같은 모델이면 다시 짓지 않는다 —
+   다시 지으면 노드가 새로 생겨 애니메이션이 죽는다. */
+var repMounted = null;
 function renderRep(){
   var id = state.repLast;
-  setHTML('repStage', repStageSvg(id));
+  if (repMounted !== id){
+    setHTML('repStage', repStageSvg(id));
+    repMounted = id;
+  }
+  repApplyPhase(id);
   setHTML('repAni', id ? aniBarHtml('rep', id, modelById(id).cls) : '');
   setHTML('repTubes', repTubesSvg(id));
   setHTML('nLegend2', nLegendHtml());
@@ -1412,6 +1711,7 @@ function renderRep(){
 
   var rows = '';
   var gens = [['P', 0], ['G1', 1], ['G2', 2]];
+  var COLS = ['HH', 'HL', 'LL', 'MIX'], CLS = ['n15', 'nmid', 'n14', 'nmix'];
   for (var r = 0; r < gens.length; r++){
     var key = gens[r][0], gen = gens[r][1];
     var ph = id ? aniOf('rep', id) : -1;
@@ -1422,9 +1722,14 @@ function renderRep(){
     }
     var mm = molsOf(id, gen), cnt = { HH:0, HL:0, LL:0, MIX:0 };
     for (var q = 0; q < mm.length; q++) cnt[molKind(mm[q])]++;
-    rows += '<tr><td><b>' + key + '</b></td><td>' + mm.length + '</td>' +
-      '<td>' + (cnt.HH || '—') + '</td><td>' + (cnt.HL || '—') + '</td>' +
-      '<td>' + (cnt.LL || '—') + '</td><td>' + (cnt.MIX || '—') + '</td></tr>';
+    /* ★지금 무대에 떠 있는 세대를 노랑 테두리로 짚어 준다 — 표와 그림을 잇는다 */
+    var now = (gen === (ph >= 5 ? 2 : (ph >= 3 ? 1 : 0)));
+    rows += '<tr' + (now ? ' class="now"' : '') + '><td><b>' + key + '</b></td><td><b>' + mm.length + '</b></td>';
+    for (var cc = 0; cc < COLS.length; cc++){
+      var v = cnt[COLS[cc]];
+      rows += '<td class="' + (v ? 'has ' + CLS[cc] : 'zero') + '">' + (v ? v : '—') + '</td>';
+    }
+    rows += '</tr>';
   }
   setHTML('repTbody', rows);
 
@@ -2407,6 +2712,7 @@ function resetAll(){
   state = freshState();
   balPick = { top:null, bot:null };
   cmpQShown = -1;
+  repMounted = null;              /* ★무대를 다시 짓게 한다 */
   ani = { st:null, id:null, ph:0, gen:ani.gen + 1, auto:false, reveal:false };
   if (typeof location !== 'undefined' && location.reload) location.reload();
 }
